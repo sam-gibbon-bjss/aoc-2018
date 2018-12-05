@@ -1,5 +1,6 @@
 from parse import compile
 from functools import reduce
+from operator import itemgetter
 
 
 def read_input():
@@ -9,8 +10,8 @@ def read_input():
 
 guard_asleep = {
     '0': {
-        '0': 0,
-        '1': 0,
+        0: 0,
+        1: 0,
         # etc ... to 59
     }
 }
@@ -76,6 +77,24 @@ def part1():
     print("Most often asleep at minute {}".format(sleepiest_minute))
 
     print("Product:", int(sleepiest_guard) * int(sleepiest_minute))
+
+    part2()
+
+
+def guard_sleepiest_minute(guard_time_dict):
+    sleepiest_minute = max(guard_time_dict, key=guard_time_dict.get)
+    sleep_count = guard_time_dict[sleepiest_minute]
+    return (sleep_count, sleepiest_minute) # sleep_count first to make finding max sleep count easier later
+
+
+def part2():
+    sleepiest_guard_minute = {k: guard_sleepiest_minute(v) for k, v in guard_asleep.items()}
+
+    sleepiest_id = max(sleepiest_guard_minute, key=sleepiest_guard_minute.get)
+    sleepiest_stats = sleepiest_guard_minute[sleepiest_id]
+    print("Guard {} spent minute {} asleep more than any other guard or minute - {} times in total"
+          .format(sleepiest_id, sleepiest_stats[1], sleepiest_stats[0]))
+    print("Product:", int(sleepiest_id) * int(sleepiest_stats[1]))
 
 
 if __name__ == '__main__':
