@@ -1,6 +1,5 @@
 from parse import compile
-from scipy.spatial import Voronoi, voronoi_plot_2d
-import matplotlib.pyplot as plot
+import numpy
 
 
 def read_input():
@@ -8,7 +7,7 @@ def read_input():
         return f.readlines()
 
 
-coord_format = compile("{}, {}\n")
+coord_format = compile("{:d}, {:d}\n")
 def parse_coord(coord):
     parsed = coord_format.parse(coord)
     return tuple(parsed)
@@ -34,27 +33,57 @@ def area_from_points(points):
 
     return abs(area / 2.0)
 
+def manhattan_distance(point1, point2):
+    return abs(point1[0] - point2[0]) + abs(point1[1] - point2[1])
 
 def part1():
     raw_coordinates = read_input()
-    coordinates = list(map(parse_coord, raw_coordinates))
-    # coordinates = [[0.5, 0.5], [0, 1], [1, 0], [1, 1], [1, 2], [1.5, 0.5], [2, 1], [1.5, 1.5]]
+    # coordinates = list(map(parse_coord, raw_coordinates))
+    coordinates = [[1, 1], [1, 6], [8, 3], [3, 4], [5, 5], [8, 9]]
 
-    vor = Voronoi(coordinates)
-    voronoi_plot_2d(vor)
+    x_coords, y_coords = zip(*coordinates)
+    max_x = max(x_coords)
+    max_y = max(y_coords)
 
-    finite_regions_index = list(filter(lambda region: len(region) != 0 and -1 not in region, vor.regions))
+    grid_size = max(max_x, max_y) + 1  # top left corner is 0,0
 
-    # vor.regions gives points as indices into the vor.vertices list
-    finite_regions = list(map(lambda region: [vor.vertices[i] for i in region], finite_regions_index))
+    print("{} coordinates provided. Coordinate file requires {}x{} grid ({} spaces, {} total iterations)"
+          .format(len(coordinates), grid_size, grid_size, (grid_size**2), (grid_size**2 * len(coordinates))))
 
-    regions = {i: finite_regions[i] for i in range(len(finite_regions))}
-    print("{} finite regions: {}".format(len(regions), regions))
+    grid = numpy.empty((grid_size, grid_size), dtype=numpy.int16)
+    grid.fill(-1)
 
-    region_areas = {i: area_from_points(regions[i]) for i in range(len(finite_regions))}
-    print("Region areas: {}".format(region_areas))
+    # place initial coordinates
+    for i in range(len(coordinates)):
+        coord = coordinates[i]
+        grid[coord[1]][coord[0]] = i
 
-    plot.show()
+    # for each grid space, compute distance to each coordinate and attach it to the nearest
+    for x in range(grid_size):
+        for y in range(grid_size):
+            is_dupe = False
+            smallest_coord = None
+            smallest_distance = grid_size * 2  # max possible distance in the grid
+            for coord in coordinates:
+                distance = manhattan_distance([x, y], coord)
+                if distance == smallest_distance:
+                    is_dupe = True
+                elif distance < smallest_distance:
+                    is_dupe = False
+                    smallest_distance = distance
+                    smallest_coord = coord
+
+            if not is_dupe:
+                grid[y][x] = grid[smallest_coord[1]][smallest_coord[0]]
+
+    print(grid)
+
+    # if a region touches the edge, it is infinite and should not be considered
+    print("Top row: {}".format(grid[0], ...))
+    print("Bottom row: {}".format(grid[max_y, ...]))
+    print("Left column: {}".format(grid[..., 0]))
+    print("Right column: {}".format(grid[..., max_x]))
+
 
 
 if __name__ == '__main__':
