@@ -38,20 +38,21 @@ def manhattan_distance(point1, point2):
 
 def part1():
     raw_coordinates = read_input()
-    # coordinates = list(map(parse_coord, raw_coordinates))
-    coordinates = [[1, 1], [1, 6], [8, 3], [3, 4], [5, 5], [8, 9]]
+    coordinates = list(map(parse_coord, raw_coordinates))
+    # coordinates = [[1, 1], [1, 6], [8, 3], [3, 4], [5, 5], [8, 9]]
 
     x_coords, y_coords = zip(*coordinates)
     max_x = max(x_coords)
     max_y = max(y_coords)
 
     grid_size = max(max_x, max_y) + 1  # top left corner is 0,0
+    empty_space = len(coordinates)  # numpy requires non-negative integers, this is guaranteed to not be used
 
     print("{} coordinates provided. Coordinate file requires {}x{} grid ({} spaces, {} total iterations)"
           .format(len(coordinates), grid_size, grid_size, (grid_size**2), (grid_size**2 * len(coordinates))))
 
     grid = numpy.empty((grid_size, grid_size), dtype=numpy.int16)
-    grid.fill(-1)
+    grid.fill(empty_space)
 
     # place initial coordinates
     for i in range(len(coordinates)):
@@ -79,11 +80,18 @@ def part1():
     print(grid)
 
     # if a region touches the edge, it is infinite and should not be considered
-    print("Top row: {}".format(grid[0], ...))
-    print("Bottom row: {}".format(grid[max_y, ...]))
+    print("Top row: {}".format(grid[0]))
+    print("Bottom row: {}".format(grid[max_y]))
     print("Left column: {}".format(grid[..., 0]))
     print("Right column: {}".format(grid[..., max_x]))
 
+    infinite_areas = {*grid[0], *grid[max_y], *grid[..., 0], *grid[..., max_x]}
+
+    areas = numpy.bincount(grid.flatten())
+    finite_areas = {i: areas[i] for i in range(empty_space) if i not in infinite_areas}
+    print("Finite areas: {}".format(finite_areas))
+
+    print("Largest finite area: {}".format(max(finite_areas.values())))
 
 
 if __name__ == '__main__':
