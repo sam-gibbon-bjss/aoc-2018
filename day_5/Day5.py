@@ -43,5 +43,20 @@ def part1():
     print("Remaining units: {}".format(len(polymer)))
 
 
+def part2():
+    polymer = read_input()
+
+    polymer_chars = set(polymer.upper())
+
+    reduced_polymer_lengths = {}
+    for char in polymer_chars:
+        reduced_polymer = polymer.replace(char, "").replace(char.lower(), "")
+        reduced_reacted_polymer = react(reduced_polymer)
+        reduced_polymer_lengths[char] = len(reduced_reacted_polymer)
+
+    print(reduced_polymer_lengths)
+
+
 if __name__ == '__main__':
     part1()
+    part2()
