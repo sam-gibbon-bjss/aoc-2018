@@ -1,6 +1,3 @@
-from parse import compile
-
-
 def read_input():
     with open('input.txt') as f:
         return f.readline().strip()
