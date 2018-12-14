@@ -47,12 +47,16 @@ def part1():
 
     grid_size = max(max_x, max_y) + 1  # top left corner is 0,0
     empty_space = len(coordinates)  # numpy requires non-negative integers, this is guaranteed to not be used
+    in_region = empty_space + 1
 
     print("{} coordinates provided. Coordinate file requires {}x{} grid ({} spaces, {} total iterations)"
           .format(len(coordinates), grid_size, grid_size, (grid_size**2), (grid_size**2 * len(coordinates))))
 
     grid = numpy.empty((grid_size, grid_size), dtype=numpy.int16)
     grid.fill(empty_space)
+
+    region = numpy.empty((grid_size, grid_size), dtype=numpy.int16)
+    region.fill(empty_space)
 
     # place initial coordinates
     for i in range(len(coordinates)):
@@ -65,8 +69,12 @@ def part1():
             is_dupe = False
             smallest_coord = None
             smallest_distance = grid_size * 2  # max possible distance in the grid
+
+            total_manhattan = 0
+
             for coord in coordinates:
                 distance = manhattan_distance([x, y], coord)
+                total_manhattan += distance
                 if distance == smallest_distance:
                     is_dupe = True
                 elif distance < smallest_distance:
@@ -77,7 +85,11 @@ def part1():
             if not is_dupe:
                 grid[y][x] = grid[smallest_coord[1]][smallest_coord[0]]
 
+            if total_manhattan < 10000:
+                region[y][x] = in_region
+
     print(grid)
+    print(region)
 
     # if a region touches the edge, it is infinite and should not be considered
     print("Top row: {}".format(grid[0]))
@@ -92,6 +104,9 @@ def part1():
     print("Finite areas: {}".format(finite_areas))
 
     print("Largest finite area: {}".format(max(finite_areas.values())))
+
+    region_size = numpy.bincount(region.flatten())[in_region]
+    print("Safe region size: {}".format(region_size))
 
 
 if __name__ == '__main__':
